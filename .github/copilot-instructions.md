@@ -13,6 +13,9 @@ C# library for parsing RTF documents into a DOM tree and writing RTF back out. O
 - `Source\RtfDomParser.Tests` — NUnit test project (`net7.0-windows`, uses WinForms).
 - `Source\RtfDomParser.WinFormsDemo` — WinForms sample app referencing the library.
 
+## Rules
+- **Never** commit or push changes in git. User should **always** review the changes and commit manually.
+
 ## Build
 
 ```powershell
