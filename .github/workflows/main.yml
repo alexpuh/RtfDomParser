@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+env:
+  RELEASE_VERSION: "7.0"
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set beta suffix
+      if: ${{ !startsWith(github.ref, 'refs/heads/master') }}
+      run: |
+        echo "VERSION_SUFFIX=beta" >> $GITHUB_ENV
+        echo "DOTNET_CONFIGURATION=Debug" >> $GITHUB_ENV
+        echo "NUGET_VERSION_SUFFIX=-beta" >> $GITHUB_ENV       
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Setup Nuget
+      run: dotnet nuget add source --username alexpuh --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/alexpuh/index.json"
+
+    - name: Restore Dependencies
+      run: dotnet restore ./Source/RtfDomParser/RtfDomParser.csproj
+
+    - name: Build
+      run: dotnet build --configuration ${{env.DOTNET_CONFIGURATION}} --no-restore ./Source/RtfDomParser/RtfDomParser.csproj -p:Version=${{ env.RELEASE_VERSION }}.${{ github.run_number }}${{env.NUGET_VERSION_SUFFIX}}
+      
+    - name: Pack
+      run: dotnet pack --configuration ${{env.DOTNET_CONFIGURATION}} --no-restore ./Source/RtfDomParser/RtfDomParser.csproj -o pack -p:Version=${{ env.RELEASE_VERSION }}.${{ github.run_number }}${{env.NUGET_VERSION_SUFFIX}}
+      
+    - name: Server artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: RtfDomParser-${{ env.RELEASE_VERSION }}.${{ github.run_number }}${{env.NUGET_VERSION_SUFFIX}}
+        path: |
+          pack/RtfDomParser.${{ env.RELEASE_VERSION }}.${{ github.run_number }}${{env.NUGET_VERSION_SUFFIX}}.nupkg
+
+    - name: Publish
+      run: dotnet nuget push pack/RtfDomParser.${{ env.RELEASE_VERSION }}.${{ github.run_number }}${{env.NUGET_VERSION_SUFFIX}}.nupkg --source "github"      

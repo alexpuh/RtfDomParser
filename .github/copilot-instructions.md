@@ -22,8 +22,10 @@ C# library for parsing RTF documents into a DOM tree and writing RTF back out. O
 dotnet build Source\RtfDomParser.sln
 ```
 
-CI (AppVeyor, see `appveyor.yml`) just builds the solution with minimal verbosity; there is no
-separate lint step.
+CI (GitHub Actions, see `.github\workflows\main.yml`) builds, packs, and publishes only the
+`RtfDomParser` library project (not the tests or demo project) to GitHub Packages on every push
+to `master`/`develop`; `develop` pushes get a `-beta` version suffix and `Debug` configuration.
+There is no separate lint step.
 
 ## Tests
 

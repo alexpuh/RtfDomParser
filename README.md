@@ -9,7 +9,7 @@ The development of the project is dead so here I will continue to support the co
 
 ## Build
 
-[![Build status](https://ci.appveyor.com/api/projects/status/ts22h5vdkjej9j25?svg=true)](https://ci.appveyor.com/project/NikolayIT/rtfdomparser)
+[![Build](https://github.com/alexpuh/RtfDomParser/actions/workflows/main.yml/badge.svg)](https://github.com/alexpuh/RtfDomParser/actions/workflows/main.yml)
 
 **NuGet:** https://www.nuget.org/packages/RtfDomParser/
 
