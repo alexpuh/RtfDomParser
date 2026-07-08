@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 [assembly: AssemblyTitle("RTFDomParser")]
 [assembly: AssemblyDescription("Author : yuans , contact : yyf9989@hotmail.com , site : http://www.sinoreport.net")]
@@ -11,6 +12,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]
+
+[assembly: SupportedOSPlatform("windows")]
 
 [assembly: Guid("62eb6bd0-e6c4-4a35-8afc-82fb2bf43a26")]
 

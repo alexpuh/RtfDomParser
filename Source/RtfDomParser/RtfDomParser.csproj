@@ -1,19 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>RTF DOM Parser</Title>
-		<Version>7.0.0</Version>
-    <Authors>Nikolay.IT, yuan yong fu</Authors>
-    <PackageProjectUrl>https://github.com/NikolayIT/RtfDomParser</PackageProjectUrl>
+    <Authors>Nikolay.IT, yuan yong fu, Alexej Puchovski</Authors>
+    <PackageProjectUrl>https://github.com/alexpuh/RtfDomParser</PackageProjectUrl>
 		<Description>RtfDomParser (a.k.a. DCSoft.RTF and XDesigner.RTF) is an open source C# library for parsing RTF documents and generating RTF DOM Tree.</Description>
 		<PackageReleaseNotes>Original version from yuan yong fu targeting .NET 7.0 with DCSoft.RTF namespaces</PackageReleaseNotes>
 		<PackageTags>RTF, RtfDomParser, DCSoft.RTF, XDesigner.RTF</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/SourceCodeBackup</RepositoryUrl>
+		<RepositoryUrl>https://github.com/alexpuh/RtfDomParser</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
@@ -30,8 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.9" />
   </ItemGroup>
 
 </Project>
