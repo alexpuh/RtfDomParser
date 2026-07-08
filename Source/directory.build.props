@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
-		<TargetFramework>net10.0-windows</TargetFramework>
+		<DotNetVersion>net10.0</DotNetVersion>
+		<TargetFramework>$(DotNetVersion)-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
 		<DebugType>embedded</DebugType>
