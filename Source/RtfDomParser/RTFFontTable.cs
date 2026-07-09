@@ -284,32 +284,46 @@ namespace RtfDomParser
         private static Dictionary<int, Encoding> _EncodingCharsets = null;
         private static void CheckEncodingCharsets()
         {
-            if (_EncodingCharsets == null)
+            if (_EncodingCharsets != null)
             {
-                _EncodingCharsets = new Dictionary<int, Encoding>();
-                //_EncodingCharsets[0] = ANSIEncoding.Instance;
-                //_EncodingCharsets[1] = Encoding.Default;
-                _EncodingCharsets[77] = Encoding.GetEncoding(10000);//Mac ,macintosh Î÷Å·×Ö·û(Mac)
-                _EncodingCharsets[128] = Encoding.GetEncoding(932);//Shift Jis ;ANSI/OEM - Japanese, Shift-JIS 
-                _EncodingCharsets[130] = Encoding.GetEncoding(1361);//Johab;Korean (Johab) 
-                _EncodingCharsets[134] = Encoding.GetEncoding(936);//GB2312
-                _EncodingCharsets[136] = Encoding.GetEncoding(10002);//Big5
-                _EncodingCharsets[161] = Encoding.GetEncoding(1253);//Greek
-                _EncodingCharsets[162] = Encoding.GetEncoding(1254);//Turkish
-                _EncodingCharsets[163] = Encoding.GetEncoding(1258);//Vietnamese;ANSI/OEM - Vietnamese 
-                _EncodingCharsets[177] = Encoding.GetEncoding(1255);//Hebrw
-                _EncodingCharsets[178] = Encoding.GetEncoding(864);//Arabic
-                _EncodingCharsets[179] = Encoding.GetEncoding(864);//Arabic Traditional
-                _EncodingCharsets[180] = Encoding.GetEncoding(864);//Arabic user
-                _EncodingCharsets[181] = Encoding.GetEncoding(864);//Hebrew user
-                _EncodingCharsets[186] = Encoding.GetEncoding(775);//Baltic
-                _EncodingCharsets[204] = Encoding.GetEncoding(866);//Russian
-                _EncodingCharsets[222] = Encoding.GetEncoding(874);//Thai
-                _EncodingCharsets[255] = Encoding.GetEncoding(437);//OEM
-
-
-
+                return;
             }
+
+            // Encoding.GetEncoding(codePage) below requires CodePagesEncodingProvider to be
+            // registered on .NET Core/5+/7+, otherwise it throws NotSupportedException. Normally
+            // this is already registered by Defaults.LoadEncodings(), invoked from the static
+            // constructors of RTFDomDocument/RTFWriter, but RTFFont/RTFFontTable can be
+            // constructed and used directly without ever touching those types, so register it
+            // here too to keep this method self-contained and not fragile to call order.
+            Defaults.LoadEncodings();
+
+            _EncodingCharsets = new Dictionary<int, Encoding>
+            {
+                // Charsets 0 ("ANSI") and 1 ("default", also used when \fcharsetN is omitted)
+                // both mean Windows-1252 in real-world RTF. The previous ANSIEncoding (Latin-1
+                // semantics, mishandles 0x80-0x9F, e.g. \'80 -> control char instead of 'â‚¬') and
+                // Encoding.Default (hard-coded to UTF-8 on .NET Core/5+, corrupting \'XX escapes
+                // to U+FFFD) were both wrong here.
+                [0] = Encoding.GetEncoding(1252),
+                [1] = Encoding.GetEncoding(1252),
+                [77] = Encoding.GetEncoding(10000), //Mac ,macintosh ï¿½ï¿½Å·ï¿½Ö·ï¿½(Mac)
+                [128] = Encoding.GetEncoding(932), //Shift Jis ;ANSI/OEM - Japanese, Shift-JIS 
+                [130] = Encoding.GetEncoding(1361), //Johab;Korean (Johab) 
+                [134] = Encoding.GetEncoding(936), //GB2312
+                [136] = Encoding.GetEncoding(10002), //Big5
+                [161] = Encoding.GetEncoding(1253), //Greek
+                [162] = Encoding.GetEncoding(1254), //Turkish
+                [163] = Encoding.GetEncoding(1258), //Vietnamese;ANSI/OEM - Vietnamese 
+                [177] = Encoding.GetEncoding(1255), //Hebrw
+                [178] = Encoding.GetEncoding(864), //Arabic
+                [179] = Encoding.GetEncoding(864), //Arabic Traditional
+                [180] = Encoding.GetEncoding(864), //Arabic user
+                [181] = Encoding.GetEncoding(864), //Hebrew user
+                [186] = Encoding.GetEncoding(775), //Baltic
+                [204] = Encoding.GetEncoding(866), //Russian
+                [222] = Encoding.GetEncoding(874), //Thai
+                [255] = Encoding.GetEncoding(437) //OEM
+            };
         }
 
         internal static int GetCharset(Encoding encoding)
@@ -325,95 +339,10 @@ namespace RtfDomParser
             return 1;
         }
 
-        internal static System.Text.Encoding GetRTFEncoding(int fchartset)
+        private static System.Text.Encoding GetRTFEncoding(int fchartset)
         {
-            if (fchartset == 0)
-            {
-                return ANSIEncoding.Instance;
-            }
-            else if (fchartset == 1)
-            {
-                return Encoding.Default;
-            }
-            else
-            {
-                CheckEncodingCharsets();
-                if (_EncodingCharsets.ContainsKey(fchartset))
-                {
-                    return _EncodingCharsets[fchartset];
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            //switch (fchartset)
-            //{
-            //    case 0: 	// ANSI
-            //        return ANSIEncoding.Instance;
-            //    case 1:	// Default
-            //        return System.Text.Encoding.Default;
-                    
-            //    //case 2:	// Symbol
-            //    //case 3:	// Invalid
-            //    case 77:   // Mac
-            //        return System.Text.Encoding.GetEncoding(10000); //macintosh Î÷Å·×Ö·û(Mac)
-                    
-            //    case 128:	// Shift Jis
-            //        return System.Text.Encoding.GetEncoding(932);// ANSI/OEM - Japanese, Shift-JIS 
-                    
-            //    //case 129:	// Hangul
-            //    case 130:	// Johab
-            //        return System.Text.Encoding.GetEncoding(1361);// Korean (Johab) 
-                    
-            //    case 134:	// GB2312
-            //        return System.Text.Encoding.GetEncoding(936);
-                    
-            //    case 136:	// Big5
-            //        return System.Text.Encoding.GetEncoding(10002);// MAC - Traditional Chinese (Big5) 
-                    
-            //    case 161:	// Greek
-            //        return System.Text.Encoding.GetEncoding(1253);// ANSI - Greek 
-                    
-            //    case 162:	// Turkish
-            //        return System.Text.Encoding.GetEncoding(1254);//ANSI - Turkish 
-                    
-            //    case 163:	// Vietnamese
-            //        return System.Text.Encoding.GetEncoding(1258);// ANSI/OEM - Vietnamese 
-                    
-            //    case 177:	// Hebrew
-            //        return System.Text.Encoding.GetEncoding(1255);// ANSI - Hebrew 
-                    
-            //    case 178:	// Arabic
-            //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
-            //    case 179:	// Arabic Traditional
-            //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
-            //    case 180:	// Arabic user
-            //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
-            //    case 181:	// Hebrew user
-            //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
-            //    case 186:	// Baltic
-            //        return System.Text.Encoding.GetEncoding(775);//OEM - Baltic 
-                    
-            //    case 204:	// Russian
-            //        return System.Text.Encoding.GetEncoding(866);//OEM - Russian 
-                    
-            //    case 222:	// Thai
-            //        return System.Text.Encoding.GetEncoding(874);//ANSI/OEM - Thai (same as 28605, ISO 8859-15) 
-                    
-            //    //case 238:	// Eastern European
-            //    //case 254:	// PC 437
-            //    case 255:	// OEM
-            //        return System.Text.Encoding.GetEncoding(437);//OEM - United States 
-                    
-            //    default:
-            //        return null;
-            //}
+            CheckEncodingCharsets();
+            return _EncodingCharsets.GetValueOrDefault(fchartset);
         }
 
         private System.Text.Encoding myEncoding = null ;
@@ -442,50 +371,5 @@ namespace RtfDomParser
         {
             return intIndex + ":" + strName + " Charset:" + intCharset;
         }
-    }
-
-    
-    /// <summary>
-    /// internal encoding for ansi
-    /// </summary>
-    internal class ANSIEncoding : System.Text.Encoding
-    {
-        public static ANSIEncoding Instance = new ANSIEncoding();
-        public override string GetString(byte[] bytes, int index, int count)
-        {
-            System.Text.StringBuilder str = new System.Text.StringBuilder();
-            int endIndex = Math.Min(bytes.Length-1, index + count -1);
-            for (int iCount = index ; iCount <= endIndex ; iCount++)
-            {
-                str.Append(System.Convert.ToChar(bytes[iCount]));
-            }
-            return str.ToString();
-        }
-
-        public override int GetByteCount(char[] chars, int index, int count)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-        public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-        public override int GetCharCount(byte[] bytes, int index, int count)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-        public override int GetMaxByteCount(int charCount)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-        public override int GetMaxCharCount(int byteCount)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
     }
 }
