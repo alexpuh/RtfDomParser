@@ -328,17 +328,10 @@ namespace RtfDomParser
             return 1;
         }
 
-        internal static System.Text.Encoding GetRTFEncoding(int fchartset)
+        private static System.Text.Encoding GetRTFEncoding(int fchartset)
         {
             CheckEncodingCharsets();
-            if (_EncodingCharsets.ContainsKey(fchartset))
-            {
-                return _EncodingCharsets[fchartset];
-            }
-            else
-            {
-                return null;
-            }
+            return _EncodingCharsets.GetValueOrDefault(fchartset);
         }
 
         private System.Text.Encoding myEncoding = null ;
