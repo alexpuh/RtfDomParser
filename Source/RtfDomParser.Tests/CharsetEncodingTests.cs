@@ -95,5 +95,24 @@ namespace RtfDomParser.Tests
 
             Assert.That(readDoc.InnerText.Trim(), Is.EqualTo("Rezept für 4 Personen: €10"));
         }
+
+        /// <summary>
+        /// Regression for a fragility issue flagged in PR review: RTFFont/RTFFontTable must
+        /// not depend on RTFDomDocument's or RTFWriter's static constructor having already run
+        /// Defaults.LoadEncodings() (which registers CodePagesEncodingProvider). Constructing
+        /// and using an RTFFont directly must not throw NotSupportedException when resolving
+        /// charset 0/1 to Windows-1252. Note: because CodePagesEncodingProvider registration is
+        /// process-wide, this test only reliably reproduces the original bug when run in
+        /// isolation (e.g. via --filter), since other tests in the same run may already have
+        /// triggered registration via RTFDomDocument/RTFWriter's static constructors.
+        /// </summary>
+        [Test]
+        public void UsingRTFFontDirectly_WithoutTouchingRTFDomDocumentOrWriter_DoesNotThrow()
+        {
+            RTFFont font = new RTFFont(0, "Arial");
+
+            Assert.That(() => font.Charset = 0, Throws.Nothing);
+            Assert.That(font.Encoding?.WebName, Is.EqualTo("windows-1252"));
+        }
     }
 }

@@ -284,15 +284,26 @@ namespace RtfDomParser
         private static Dictionary<int, Encoding> _EncodingCharsets = null;
         private static void CheckEncodingCharsets()
         {
-            _EncodingCharsets ??= new Dictionary<int, Encoding>
+            if (_EncodingCharsets != null)
+            {
+                return;
+            }
+
+            // Encoding.GetEncoding(codePage) below requires CodePagesEncodingProvider to be
+            // registered on .NET Core/5+/7+, otherwise it throws NotSupportedException. Normally
+            // this is already registered by Defaults.LoadEncodings(), invoked from the static
+            // constructors of RTFDomDocument/RTFWriter, but RTFFont/RTFFontTable can be
+            // constructed and used directly without ever touching those types, so register it
+            // here too to keep this method self-contained and not fragile to call order.
+            Defaults.LoadEncodings();
+
+            _EncodingCharsets = new Dictionary<int, Encoding>
             {
                 // Charsets 0 ("ANSI") and 1 ("default", also used when \fcharsetN is omitted)
                 // both mean Windows-1252 in real-world RTF. The previous ANSIEncoding (Latin-1
                 // semantics, mishandles 0x80-0x9F, e.g. \'80 -> control char instead of '€') and
                 // Encoding.Default (hard-coded to UTF-8 on .NET Core/5+, corrupting \'XX escapes
-                // to U+FFFD) were both wrong here. Requires CodePagesEncodingProvider, already
-                // registered by Defaults.LoadEncodings() from RTFDomDocument/RTFWriter static
-                // constructors.
+                // to U+FFFD) were both wrong here.
                 [0] = Encoding.GetEncoding(1252),
                 [1] = Encoding.GetEncoding(1252),
                 [77] = Encoding.GetEncoding(10000), //Mac ,macintosh ��ŷ�ַ�(Mac)
