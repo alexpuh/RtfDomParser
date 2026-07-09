@@ -45,6 +45,14 @@ namespace RtfDomParser
             }
         }
 
+        /// <summary>
+        /// identifier of the brace-group scope that produced this text node.
+        /// Used internally by <see cref="RTFDomDocument"/> to avoid merging adjacent
+        /// text runs that originate from separate RTF brace groups (e.g. "{...}{...}"),
+        /// even when their formatting is identical.
+        /// </summary>
+        internal int GroupId = 0;
+
         private string strText = null;
         /// <summary>
         /// text
